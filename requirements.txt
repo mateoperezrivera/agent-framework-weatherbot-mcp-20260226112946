@@ -1,0 +1,10 @@
+# Agent Framework stack (preview/RC versions)
+agent-framework-core==1.0.0rc2
+agent-framework-azure-ai==1.0.0rc2
+agent-framework-devui==1.0.0b260212
+
+# App dependencies
+azure-identity==1.26.0b2
+python-dotenv==1.2.1
+requests==2.32.5
+mcp>=1.24.0,<2
