@@ -29,7 +29,9 @@ AZURE_OPENAI_CHAT_DEPLOYMENT_NAME=gpt-4o
 
 ```bash
 az login
-python main.py
+python main.py        # Opens DevUI at http://127.0.0.1:8070
+# or
+python cli.py         # Terminal chat interface
 ```
 
 ---
@@ -40,7 +42,8 @@ python main.py
 |---|---|
 | `agent.py` | Agent definition — **edit this** to change behavior |
 | `mcp_server.py` | MCP tools — **edit this** to add your own tools |
-| `main.py` | CLI entry point (just run it) |
+| `main.py` | DevUI entry point — **primary way to test** |
+| `cli.py` | CLI chat (alternative) |
 
 ---
 
