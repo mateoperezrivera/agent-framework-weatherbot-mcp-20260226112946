@@ -1,13 +1,21 @@
+import os
 import sys
 from pathlib import Path
 
 import requests
-from agent_framework import MCPStdioTool, tool
+from agent_framework import MCPStdioTool, MCPStreamableHTTPTool, tool
 from agent_framework.azure import AzureOpenAIChatClient
 from azure.identity import AzureCliCredential
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Optional: App Insights tracing (set APPLICATIONINSIGHTS_CONNECTION_STRING in .env)
+if os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"):
+    from agent_framework.observability import enable_instrumentation, create_resource
+    from azure.monitor.opentelemetry import configure_azure_monitor
+    configure_azure_monitor(resource=create_resource(), enable_live_metrics=True)
+    enable_instrumentation()
 
 
 # --- Inline tools (use the @tool decorator) ---
@@ -34,6 +42,13 @@ def create_agent():
         description="Weather MCP server (Open-Meteo, no API key needed)",
     )
 
+    # Remote MCP tool: Microsoft Learn documentation
+    ms_learn_mcp = MCPStreamableHTTPTool(
+        name="ms_learn",
+        url="https://learn.microsoft.com/api/mcp",
+        description="Microsoft Learn MCP server",
+    )
+
     return AzureOpenAIChatClient(
         credential=AzureCliCredential(),
     ).as_agent(
@@ -42,9 +57,10 @@ def create_agent():
         instructions=(
             "You are a friendly assistant. "
             "Use the weather tool for weather questions. "
+            "Use the ms_learn tool for Microsoft Learn documentation questions. "
             "Use get_random_fact when the user asks for trivia. "
             "Keep answers short."
         ),
         # ✏️ Add or remove tools here
-        tools=[weather_mcp, get_random_fact],
+        tools=[weather_mcp, ms_learn_mcp, get_random_fact],
     )
