@@ -1,5 +1,4 @@
-agent-framework==1.0.0rc5
-agent-framework-devui==1.0.0rc5
+agent-framework==1.3.0
 azure-identity==1.26.0b2
 azure-monitor-opentelemetry
 python-dotenv==1.2.1
