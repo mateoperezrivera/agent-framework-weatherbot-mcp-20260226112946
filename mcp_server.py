@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import Any
 
 import requests
+from mcp import types
 from mcp.server import FastMCP
+from mcp.server.fastmcp import Context
 
 mcp = FastMCP("local-weather")
 
@@ -72,6 +74,26 @@ def get_weather(city: str) -> str:
     location = f"{city_name}, {country}" if country else city_name
 
     return f"{location}: {condition}, {temperature}°C, wind {wind} km/h."
+
+
+@mcp.tool()
+async def generate_greeting(name: str, ctx: Context) -> str:
+    """Generate a friendly one-line greeting for a person by asking the host LLM (MCP sampling)."""
+    result = await ctx.session.create_message(
+        messages=[
+            types.SamplingMessage(
+                role="user",
+                content=types.TextContent(
+                    type="text",
+                    text=f"Write a short, friendly one-line greeting for {name}. Reply with the greeting only.",
+                ),
+            )
+        ],
+        max_tokens=100,
+    )
+    if isinstance(result.content, types.TextContent):
+        return result.content.text
+    return f"Hello, {name}!"
 
 
 if __name__ == "__main__":

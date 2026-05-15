@@ -4,8 +4,7 @@ from pathlib import Path
 
 import requests
 from agent_framework import MCPStdioTool, MCPStreamableHTTPTool, tool
-from agent_framework.azure import AzureOpenAIChatClient
-from azure.identity import AzureCliCredential
+from agent_framework.openai import OpenAIChatClient
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,12 +33,17 @@ def get_random_fact() -> str:
 # --- Agent definition ---
 
 def create_agent():
+    # Shared chat client. Also passed to the MCP tool so the server can use
+    # MCP "sampling" to ask the host LLM for completions.
+    chat_client = OpenAIChatClient()
+
     # MCP tool: runs mcp_server.py as a subprocess
     weather_mcp = MCPStdioTool(
         name="weather",
         command=sys.executable,
         args=[str(Path(__file__).with_name("mcp_server.py"))],
         description="Weather MCP server (Open-Meteo, no API key needed)",
+        client=chat_client,  # enables MCP sampling callbacks from the server
     )
 
     # Remote MCP tool: Microsoft Learn documentation
@@ -49,9 +53,7 @@ def create_agent():
         description="Microsoft Learn MCP server",
     )
 
-    return AzureOpenAIChatClient(
-        credential=AzureCliCredential(),
-    ).as_agent(
+    return chat_client.as_agent(
         name="WeatherBot",
         # ✏️ Change the instructions to customize your agent's behavior
         instructions=(
